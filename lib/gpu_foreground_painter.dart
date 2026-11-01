@@ -579,7 +579,6 @@ class GpuForegroundPainter extends CustomPainter {
   final void Function(String connectionId, Offset? position, bool isHovering, bool isVisible)? onConnectionHover;
   final void Function(String satelliteId, Offset? position, bool isHovering, bool isVisible)? onSatelliteHover;
   final VoidCallback? onPointClicked;
-  final VoidCallback? onRepaintNeeded;
 
   // Previous state for change detection
   final String? previousHoveredPointId;
@@ -599,7 +598,6 @@ class GpuForegroundPainter extends CustomPainter {
     this.onConnectionHover,
     this.onSatelliteHover,
     this.onPointClicked,
-    this.onRepaintNeeded,
     this.previousHoveredPointId,
     this.previousHoveredConnectionId,
     this.previousHoveredSatelliteId,
