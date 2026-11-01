@@ -85,7 +85,8 @@ class SatelliteStyle {
       size: map['size'] as double? ?? 4.0,
       color: Color(map['color'] as int? ?? 0xFFFFFFFF),
       hasGlow: map['hasGlow'] as bool? ?? false,
-      glowColor: map['glowColor'] != null ? Color(map['glowColor'] as int) : null,
+      glowColor:
+          map['glowColor'] != null ? Color(map['glowColor'] as int) : null,
       glowIntensity: map['glowIntensity'] as double? ?? 0.5,
       sizeAttenuation: map['sizeAttenuation'] as bool? ?? true,
       transitionDuration: map['transitionDuration'] as int? ?? 500,
@@ -101,7 +102,8 @@ class SatelliteStyle {
 
   String toJson() => json.encode(toMap());
 
-  factory SatelliteStyle.fromJson(String source) => SatelliteStyle.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory SatelliteStyle.fromJson(String source) =>
+      SatelliteStyle.fromMap(json.decode(source) as Map<String, dynamic>);
 
   SatelliteStyle copyWith({
     double? size,
@@ -162,7 +164,8 @@ class SatelliteOrbit {
       return const GlobeCoordinates(0, 0);
     }
 
-    final phaseRad = (initialPhase * math.pi / 180) + (2 * math.pi * elapsedMs / periodMs);
+    final phaseRad =
+        (initialPhase * math.pi / 180) + (2 * math.pi * elapsedMs / periodMs);
     final trueAnomaly = phaseRad;
 
     final incRad = inclination * math.pi / 180;
@@ -172,7 +175,10 @@ class SatelliteOrbit {
     final u = trueAnomaly + argPeriRad;
 
     final latitude = math.asin(math.sin(incRad) * math.sin(u)) * 180 / math.pi;
-    final longitude = (raanRad + math.atan2(math.cos(incRad) * math.sin(u), math.cos(u))) * 180 / math.pi;
+    final longitude =
+        (raanRad + math.atan2(math.cos(incRad) * math.sin(u), math.cos(u))) *
+            180 /
+            math.pi;
 
     var normalizedLon = longitude % 360;
     if (normalizedLon > 180) normalizedLon -= 360;
@@ -205,14 +211,16 @@ class SatelliteOrbit {
 
   String toJson() => json.encode(toMap());
 
-  factory SatelliteOrbit.fromJson(String source) => SatelliteOrbit.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory SatelliteOrbit.fromJson(String source) =>
+      SatelliteOrbit.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 /// Represents a satellite orbiting around the globe.
 class Satellite {
   final String id;
   final String? label;
-  final Widget? Function(BuildContext context, Satellite satellite, bool isHovering, bool isVisible)? labelBuilder;
+  final Widget? Function(BuildContext context, Satellite satellite,
+      bool isHovering, bool isVisible)? labelBuilder;
   final bool isLabelVisible;
   final Offset labelOffset;
   final TextStyle? labelTextStyle;
@@ -252,7 +260,9 @@ class Satellite {
     GlobeCoordinates? coordinates,
     double? altitude,
     String? label,
-    Widget? Function(BuildContext context, Satellite satellite, bool isHovering, bool isVisible)? labelBuilder,
+    Widget? Function(BuildContext context, Satellite satellite, bool isHovering,
+            bool isVisible)?
+        labelBuilder,
     bool? isLabelVisible,
     Offset? labelOffset,
     SatelliteStyle? style,
