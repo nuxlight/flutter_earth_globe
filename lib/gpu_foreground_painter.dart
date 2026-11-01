@@ -1037,6 +1037,8 @@ class GpuForegroundPainter extends CustomPainter {
     canvas.scale(scaleX, scaleY);
     canvas.translate(-customImage.size.width / 2, -customImage.size.height / 2);
 
+    final bounds = Rect.fromLTWH(0, 0, customImage.size.width, customImage.size.height);
+    canvas.saveLayer(bounds, Paint()..color = Color.fromRGBO(0, 0, 0, paint.color.a));
     canvas.drawPicture(customImage.picture);
     canvas.restore();
   }
