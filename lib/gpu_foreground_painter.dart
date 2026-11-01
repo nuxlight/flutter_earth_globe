@@ -24,7 +24,8 @@ class PointRenderData {
   final double normalX; // Surface normal x component (towards camera)
   final double normalY; // Surface normal y component (horizontal)
   final double normalZ; // Surface normal z component (vertical)
-  final double tiltAngle; // Angle from camera view (0 = facing camera, pi/2 = edge)
+  final double
+      tiltAngle; // Angle from camera view (0 = facing camera, pi/2 = edge)
 
   PointRenderData({
     required this.id,
@@ -45,7 +46,8 @@ class ArcRenderData {
   final String id;
   final Offset start2D;
   final Offset end2D;
-  final Offset control2D; // Bezier control point (legacy, kept for compatibility)
+  final Offset
+      control2D; // Bezier control point (legacy, kept for compatibility)
   final Offset midPoint2D;
   final List<Offset> arcPoints2D; // Points along the great circle arc
   final List<bool> arcPointsVisible; // Visibility of each arc point
@@ -83,7 +85,8 @@ class SatelliteRenderData {
   final bool isVisible;
   final Satellite satellite;
   final double transitionProgress; // 0-1 for fade in animation
-  final GlobeCoordinates currentPosition; // Current position (for orbiting satellites)
+  final GlobeCoordinates
+      currentPosition; // Current position (for orbiting satellites)
 
   // 3D surface normal for tilt effect
   final double normalX;
@@ -118,7 +121,10 @@ class TransitionState {
   double transitionProgress;
   double growthProgress;
 
-  TransitionState({required this.addedAt, this.transitionProgress = 0.0, this.growthProgress = 0.0});
+  TransitionState(
+      {required this.addedAt,
+      this.transitionProgress = 0.0,
+      this.growthProgress = 0.0});
 }
 
 /// Cached orbit path data to avoid recalculation every frame
@@ -141,7 +147,9 @@ class CachedOrbitPath {
   bool isValidFor(double rotY, double rotZ, double r) {
     // Use small epsilon for floating point comparison
     const epsilon = 0.0001;
-    return (rotationY - rotY).abs() < epsilon && (rotationZ - rotZ).abs() < epsilon && (radius - r).abs() < epsilon;
+    return (rotationY - rotY).abs() < epsilon &&
+        (rotationZ - rotZ).abs() < epsilon &&
+        (radius - r).abs() < epsilon;
   }
 }
 
@@ -187,13 +195,16 @@ class GlobeForegroundRenderer {
       final transition = _pointTransitions[point.id]!;
       final elapsed = now.difference(transition.addedAt).inMilliseconds;
       final duration = point.style.transitionDuration;
-      transition.transitionProgress = duration > 0 ? (elapsed / duration).clamp(0.0, 1.0) : 1.0;
+      transition.transitionProgress =
+          duration > 0 ? (elapsed / duration).clamp(0.0, 1.0) : 1.0;
 
       // Calculate 3D position
-      final cartesian3D = getSpherePosition3D(point.coordinates, radius, rotationY, rotationZ);
+      final cartesian3D =
+          getSpherePosition3D(point.coordinates, radius, rotationY, rotationZ);
 
       // Project to 2D
-      final position2D = Offset(center.dx + cartesian3D.y, center.dy - cartesian3D.z);
+      final position2D =
+          Offset(center.dx + cartesian3D.y, center.dy - cartesian3D.z);
 
       // Visibility check (front-facing)
       final isVisible = cartesian3D.x > 0;
@@ -246,7 +257,9 @@ class GlobeForegroundRenderer {
     final List<ArcRenderData> result = [];
 
     // Calculate delta time for dash animation
-    final deltaMs = _lastFrameTime != null ? now.difference(_lastFrameTime!).inMilliseconds.toDouble() : 16.0;
+    final deltaMs = _lastFrameTime != null
+        ? now.difference(_lastFrameTime!).inMilliseconds.toDouble()
+        : 16.0;
     _lastFrameTime = now;
 
     for (final connection in connections) {
@@ -261,12 +274,16 @@ class GlobeForegroundRenderer {
 
       // Update transition (fade in) progress
       final transitionDuration = connection.style.transitionDuration;
-      transition.transitionProgress = transitionDuration > 0 ? (elapsed / transitionDuration).clamp(0.0, 1.0) : 1.0;
+      transition.transitionProgress = transitionDuration > 0
+          ? (elapsed / transitionDuration).clamp(0.0, 1.0)
+          : 1.0;
 
       // Update growth animation progress
       final growthDuration = connection.style.growthAnimationDuration;
       if (connection.style.animateOnAdd) {
-        transition.growthProgress = growthDuration > 0 ? (elapsed / growthDuration).clamp(0.0, 1.0) : 1.0;
+        transition.growthProgress = growthDuration > 0
+            ? (elapsed / growthDuration).clamp(0.0, 1.0)
+            : 1.0;
       } else {
         transition.growthProgress = 1.0;
       }
@@ -275,17 +292,21 @@ class GlobeForegroundRenderer {
       // Animate if dashAnimateTime is set (like Globe.GL's dashAnimateTime prop)
       // OR if isMoving is true (legacy behavior)
       if (connection.style.dashAnimateTime > 0 || connection.isMoving) {
-        final animateTime =
-            connection.style.dashAnimateTime > 0 ? connection.style.dashAnimateTime : 1000.0; // Default 1 second if just isMoving
+        final animateTime = connection.style.dashAnimateTime > 0
+            ? connection.style.dashAnimateTime
+            : 1000.0; // Default 1 second if just isMoving
         final dashSpeed = 1.0 / animateTime;
         final dashIncrement = deltaMs * dashSpeed;
-        _dashOffsets[connection.id] = ((_dashOffsets[connection.id] ?? 0.0) + dashIncrement) % 1.0;
+        _dashOffsets[connection.id] =
+            ((_dashOffsets[connection.id] ?? 0.0) + dashIncrement) % 1.0;
       }
 
       // === Globe.GL Style Arc Calculation ===
       // Get 3D positions
-      final startVec = getSpherePosition3D(connection.start, radius, rotationY, rotationZ);
-      final endVec = getSpherePosition3D(connection.end, radius, rotationY, rotationZ);
+      final startVec =
+          getSpherePosition3D(connection.start, radius, rotationY, rotationZ);
+      final endVec =
+          getSpherePosition3D(connection.end, radius, rotationY, rotationZ);
 
       // Project to 2D
       final start2D = Offset(center.dx + startVec.y, center.dy - startVec.z);
@@ -293,7 +314,8 @@ class GlobeForegroundRenderer {
 
       // Calculate arc using Globe.GL's method:
       // altitude = geoDistance / 2 * altAutoScale (default 0.5)
-      final centralAngle = calculateCentralAngle(connection.start, connection.end);
+      final centralAngle =
+          calculateCentralAngle(connection.start, connection.end);
       final geoDistance = centralAngle; // In radians, proportional to distance
 
       // Globe.GL default: altitude = distance/2 * 0.5 = distance/4
@@ -303,7 +325,8 @@ class GlobeForegroundRenderer {
 
       // Generate arc points - use more segments for smoother edge transitions
       // Higher resolution prevents visible "stepping" when arc disappears at sphere edge
-      const numSegments = 1000; // Higher than Globe.GL default for smoother clipping
+      const numSegments =
+          1000; // Higher than Globe.GL default for smoother clipping
       final List<Offset> arcPoints2D = [];
       final List<bool> arcPointsVisible = [];
 
@@ -331,7 +354,8 @@ class GlobeForegroundRenderer {
         }
 
         // Normalize base point
-        final baseLen = math.sqrt(baseX * baseX + baseY * baseY + baseZ * baseZ);
+        final baseLen =
+            math.sqrt(baseX * baseX + baseY * baseY + baseZ * baseZ);
         if (baseLen > 0) {
           baseX /= baseLen;
           baseY /= baseLen;
@@ -371,7 +395,8 @@ class GlobeForegroundRenderer {
         // The sphere silhouette is a circle of radius `radius` in the YZ plane
         // An elevated point appears "above" the silhouette if its 2D projection
         // is outside this circle
-        final isAboveSilhouette = projectedDistFromCenter > radius && currentAltitude > 0;
+        final isAboveSilhouette =
+            projectedDistFromCenter > radius && currentAltitude > 0;
 
         // For the front/back check, use a slightly lenient threshold
         // This prevents harsh cutting exactly at x=0
@@ -390,7 +415,8 @@ class GlobeForegroundRenderer {
       var midPoint3D = (startVec + endVec) / 2;
       midPoint3D.normalize();
       midPoint3D.scale(radius + arcAltitude);
-      final control2D = Offset(center.dx + midPoint3D.y, center.dy - midPoint3D.z);
+      final control2D =
+          Offset(center.dx + midPoint3D.y, center.dy - midPoint3D.z);
 
       result.add(
         ArcRenderData(
@@ -437,7 +463,8 @@ class GlobeForegroundRenderer {
       final transition = _satelliteTransitions[satellite.id]!;
       final elapsed = now.difference(transition.addedAt).inMilliseconds;
       final duration = satellite.style.transitionDuration;
-      transition.transitionProgress = duration > 0 ? (elapsed / duration).clamp(0.0, 1.0) : 1.0;
+      transition.transitionProgress =
+          duration > 0 ? (elapsed / duration).clamp(0.0, 1.0) : 1.0;
 
       // Get current position (handles orbiting satellites)
       final currentPosition = satellite.getPositionAtTime(now);
@@ -446,21 +473,26 @@ class GlobeForegroundRenderer {
       final satelliteRadius = radius * (1.0 + satellite.altitude);
 
       // Calculate 3D position at the satellite's altitude
-      final cartesian3D = getSpherePosition3D(currentPosition, satelliteRadius, rotationY, rotationZ);
+      final cartesian3D = getSpherePosition3D(
+          currentPosition, satelliteRadius, rotationY, rotationZ);
 
       // Project to 2D
-      final position2D = Offset(center.dx + cartesian3D.y, center.dy - cartesian3D.z);
+      final position2D =
+          Offset(center.dx + cartesian3D.y, center.dy - cartesian3D.z);
 
       // Visibility check - satellites above the globe can be visible even when
       // coordinates are "behind" the globe
       // Use the same logic as arc points for elevated objects
-      final projectedDistFromCenter = math.sqrt(cartesian3D.y * cartesian3D.y + cartesian3D.z * cartesian3D.z);
-      final isAboveSilhouette = projectedDistFromCenter > radius && satellite.altitude > 0;
+      final projectedDistFromCenter = math
+          .sqrt(cartesian3D.y * cartesian3D.y + cartesian3D.z * cartesian3D.z);
+      final isAboveSilhouette =
+          projectedDistFromCenter > radius && satellite.altitude > 0;
       final horizonThreshold = -satellite.altitude * radius * 0.3;
       final isVisible = cartesian3D.x > horizonThreshold || isAboveSilhouette;
 
       // Depth calculation for scaling (normalized 0-1)
-      final depth = isVisible ? (cartesian3D.x / satelliteRadius).clamp(0.0, 1.0) : 0.0;
+      final depth =
+          isVisible ? (cartesian3D.x / satelliteRadius).clamp(0.0, 1.0) : 0.0;
 
       // Calculate surface normal
       final normalX = cartesian3D.x / satelliteRadius;
@@ -475,7 +507,8 @@ class GlobeForegroundRenderer {
       if (satellite.style.showOrbitPath && satellite.orbit != null) {
         // Check if we have a valid cached orbit path
         final cachedPath = _orbitPathCache[satellite.id];
-        if (cachedPath != null && cachedPath.isValidFor(rotationY, rotationZ, satelliteRadius)) {
+        if (cachedPath != null &&
+            cachedPath.isValidFor(rotationY, rotationZ, satelliteRadius)) {
           // Use cached path - huge performance win!
           orbitPath2D = cachedPath.path2D;
           orbitPathVisible = cachedPath.pathVisible;
@@ -490,19 +523,27 @@ class GlobeForegroundRenderer {
 
           for (int i = 0; i <= numOrbitPoints; i++) {
             final t = i / numOrbitPoints;
-            final orbitTime = satellite.referenceTime.add(Duration(milliseconds: (orbitPeriod.inMilliseconds * t).round()));
+            final orbitTime = satellite.referenceTime.add(Duration(
+                milliseconds: (orbitPeriod.inMilliseconds * t).round()));
 
-            final orbitPos = satellite.orbit!.getPositionAtTime(orbitTime, satellite.referenceTime);
-            final orbitCartesian = getSpherePosition3D(orbitPos, satelliteRadius, rotationY, rotationZ);
+            final orbitPos = satellite.orbit!
+                .getPositionAtTime(orbitTime, satellite.referenceTime);
+            final orbitCartesian = getSpherePosition3D(
+                orbitPos, satelliteRadius, rotationY, rotationZ);
 
-            final orbitPoint2D = Offset(center.dx + orbitCartesian.y, center.dy - orbitCartesian.z);
+            final orbitPoint2D = Offset(
+                center.dx + orbitCartesian.y, center.dy - orbitCartesian.z);
             orbitPath2D.add(orbitPoint2D);
 
             // Visibility check for orbit path
-            final orbitProjDist = math.sqrt(orbitCartesian.y * orbitCartesian.y + orbitCartesian.z * orbitCartesian.z);
-            final orbitAboveSilhouette = orbitProjDist > radius && satellite.altitude > 0;
+            final orbitProjDist = math.sqrt(
+                orbitCartesian.y * orbitCartesian.y +
+                    orbitCartesian.z * orbitCartesian.z);
+            final orbitAboveSilhouette =
+                orbitProjDist > radius && satellite.altitude > 0;
             final orbitHorizonThreshold = -satellite.altitude * radius * 0.3;
-            orbitPathVisible.add(orbitCartesian.x > orbitHorizonThreshold || orbitAboveSilhouette);
+            orbitPathVisible.add(orbitCartesian.x > orbitHorizonThreshold ||
+                orbitAboveSilhouette);
           }
 
           // Cache the computed path
@@ -542,17 +583,21 @@ class GlobeForegroundRenderer {
   }
 
   /// Clean up transitions for removed elements
-  void cleanupRemovedElements(List<Point> points, List<AnimatedPointConnection> connections, [List<Satellite>? satellites]) {
+  void cleanupRemovedElements(
+      List<Point> points, List<AnimatedPointConnection> connections,
+      [List<Satellite>? satellites]) {
     final pointIds = points.map((p) => p.id).toSet();
     final connectionIds = connections.map((c) => c.id).toSet();
 
     _pointTransitions.removeWhere((key, _) => !pointIds.contains(key));
-    _connectionTransitions.removeWhere((key, _) => !connectionIds.contains(key));
+    _connectionTransitions
+        .removeWhere((key, _) => !connectionIds.contains(key));
     _dashOffsets.removeWhere((key, _) => !connectionIds.contains(key));
 
     if (satellites != null) {
       final satelliteIds = satellites.map((s) => s.id).toSet();
-      _satelliteTransitions.removeWhere((key, _) => !satelliteIds.contains(key));
+      _satelliteTransitions
+          .removeWhere((key, _) => !satelliteIds.contains(key));
       // Also cleanup orbit path cache
       _orbitPathCache.removeWhere((key, _) => !satelliteIds.contains(key));
     }
@@ -574,9 +619,13 @@ class GpuForegroundPainter extends CustomPainter {
   final bool skipSatelliteShapes;
 
   // Callbacks
-  final void Function(String pointId, Offset? position, bool isHovering, bool isVisible)? onPointHover;
-  final void Function(String connectionId, Offset? position, bool isHovering, bool isVisible)? onConnectionHover;
-  final void Function(String satelliteId, Offset? position, bool isHovering, bool isVisible)? onSatelliteHover;
+  final void Function(
+          String pointId, Offset? position, bool isHovering, bool isVisible)?
+      onPointHover;
+  final void Function(String connectionId, Offset? position, bool isHovering,
+      bool isVisible)? onConnectionHover;
+  final void Function(String satelliteId, Offset? position, bool isHovering,
+      bool isVisible)? onSatelliteHover;
   final VoidCallback? onPointClicked;
   final VoidCallback? onRepaintNeeded;
 
@@ -620,8 +669,12 @@ class GpuForegroundPainter extends CustomPainter {
       _drawPoint(canvas, point);
 
       // Draw label (non-builder labels)
-      if (point.point.isLabelVisible && point.point.label != null && point.point.label!.isNotEmpty && point.point.labelBuilder == null) {
-        _drawLabel(canvas, point.point.label!, point.point.labelTextStyle, point.position2D, size);
+      if (point.point.isLabelVisible &&
+          point.point.label != null &&
+          point.point.label!.isNotEmpty &&
+          point.point.labelBuilder == null) {
+        _drawLabel(canvas, point.point.label!, point.point.labelTextStyle,
+            point.position2D, size);
       }
     }
 
@@ -638,8 +691,9 @@ class GpuForegroundPainter extends CustomPainter {
 
       if (path != null) {
         // Check hover on arc (arcs have priority over points since they're on top)
-        final isHovering =
-            currentHoveredConnectionId == null && hoverPoint != null && _isPointOnPath(hoverPoint!, path, arc.connection.strokeWidth + 4);
+        final isHovering = currentHoveredConnectionId == null &&
+            hoverPoint != null &&
+            _isPointOnPath(hoverPoint!, path, arc.connection.strokeWidth + 4);
 
         if (isHovering) {
           currentHoveredConnectionId = arc.id;
@@ -651,7 +705,9 @@ class GpuForegroundPainter extends CustomPainter {
         onConnectionHover?.call(arc.id, arc.midPoint2D, isHovering, true);
 
         // Handle click on arc first (since arcs are on top)
-        if (!clickHandled && clickPoint != null && _isPointOnPath(clickPoint!, path, arc.connection.strokeWidth + 4)) {
+        if (!clickHandled &&
+            clickPoint != null &&
+            _isPointOnPath(clickPoint!, path, arc.connection.strokeWidth + 4)) {
           // Defer callback to after paint to avoid triggering widget builds during paint
           final callback = arc.connection.onTap;
           if (callback != null) {
@@ -689,10 +745,13 @@ class GpuForegroundPainter extends CustomPainter {
         }
       }
 
-      onPointHover?.call(point.id, point.position2D, isHovering, point.isVisible);
+      onPointHover?.call(
+          point.id, point.position2D, isHovering, point.isVisible);
 
       // Handle click (arcs already handled, so only if not already clicked)
-      if (!clickHandled && clickPoint != null && hitRect.contains(clickPoint!)) {
+      if (!clickHandled &&
+          clickPoint != null &&
+          hitRect.contains(clickPoint!)) {
         // Defer callback to after paint to avoid triggering widget builds during paint
         final callback = point.point.onTap;
         if (callback != null) {
@@ -707,7 +766,8 @@ class GpuForegroundPainter extends CustomPainter {
     String? currentHoveredSatelliteId;
     for (final satellite in satellites) {
       if (!satellite.isVisible) {
-        onSatelliteHover?.call(satellite.id, satellite.position2D, false, false);
+        onSatelliteHover?.call(
+            satellite.id, satellite.position2D, false, false);
         continue;
       }
 
@@ -736,8 +796,12 @@ class GpuForegroundPainter extends CustomPainter {
       }
 
       // Calculate hit rect for hover/click
-      final scaledSize = satellite.satellite.style.size * (0.7 + 0.6 * satellite.depth);
-      final hitRect = Rect.fromCenter(center: satellite.position2D, width: scaledSize * 2 + 8, height: scaledSize * 2 + 8);
+      final scaledSize =
+          satellite.satellite.style.size * (0.7 + 0.6 * satellite.depth);
+      final hitRect = Rect.fromCenter(
+          center: satellite.position2D,
+          width: scaledSize * 2 + 8,
+          height: scaledSize * 2 + 8);
 
       final isHovering = currentHoveredSatelliteId == null &&
           currentHoveredConnectionId == null &&
@@ -752,10 +816,13 @@ class GpuForegroundPainter extends CustomPainter {
         }
       }
 
-      onSatelliteHover?.call(satellite.id, satellite.position2D, isHovering, true);
+      onSatelliteHover?.call(
+          satellite.id, satellite.position2D, isHovering, true);
 
       // Handle click
-      if (!clickHandled && clickPoint != null && hitRect.contains(clickPoint!)) {
+      if (!clickHandled &&
+          clickPoint != null &&
+          hitRect.contains(clickPoint!)) {
         // Defer callback to after paint to avoid triggering widget builds during paint
         final callback = satellite.satellite.onTap;
         if (callback != null) {
@@ -779,7 +846,10 @@ class GpuForegroundPainter extends CustomPainter {
     if (effectiveProgress <= 0) return null;
 
     // Check for invalid/NaN coordinates
-    if (arc.start2D.dx.isNaN || arc.start2D.dy.isNaN || arc.end2D.dx.isNaN || arc.end2D.dy.isNaN) {
+    if (arc.start2D.dx.isNaN ||
+        arc.start2D.dy.isNaN ||
+        arc.end2D.dx.isNaN ||
+        arc.end2D.dy.isNaN) {
       return null;
     }
 
@@ -789,7 +859,8 @@ class GpuForegroundPainter extends CustomPainter {
     }
 
     final paint = Paint()
-      ..color = connection.style.color.withAlpha((connection.style.color.a * arc.transitionProgress * 255).round())
+      ..color = connection.style.color.withAlpha(
+          (connection.style.color.a * arc.transitionProgress * 255).round())
       ..strokeWidth = connection.style.lineWidth * globeScale
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -798,7 +869,8 @@ class GpuForegroundPainter extends CustomPainter {
     if (arc.arcPoints2D.length < 2) return null;
 
     // Apply growth animation - limit how far along the arc we draw
-    final progressIdx = ((arc.arcPoints2D.length - 1) * effectiveProgress).round();
+    final progressIdx =
+        ((arc.arcPoints2D.length - 1) * effectiveProgress).round();
     if (progressIdx < 1) return null;
 
     // Globe.GL style: draw only the visible segments
@@ -867,7 +939,8 @@ class GpuForegroundPainter extends CustomPainter {
               final endTangent = metric.getTangentForOffset(endDash);
 
               if (startTangent != null && endTangent != null) {
-                canvas.drawLine(startTangent.position, endTangent.position, paint);
+                canvas.drawLine(
+                    startTangent.position, endTangent.position, paint);
               }
             }
             distance += patternLength;
@@ -895,8 +968,12 @@ class GpuForegroundPainter extends CustomPainter {
     }
 
     // Draw label
-    if (connection.isLabelVisible && connection.label != null && connection.label!.isNotEmpty && connection.labelBuilder == null) {
-      _drawLabel(canvas, connection.label!, connection.labelTextStyle, arc.midPoint2D, size);
+    if (connection.isLabelVisible &&
+        connection.label != null &&
+        connection.label!.isNotEmpty &&
+        connection.labelBuilder == null) {
+      _drawLabel(canvas, connection.label!, connection.labelTextStyle,
+          arc.midPoint2D, size);
     }
 
     return path;
@@ -919,7 +996,8 @@ class GpuForegroundPainter extends CustomPainter {
 
     // Draw point with altitude effect
     final altitudeOffset = style.altitude * point.depth * 2.0 * globeScale;
-    final drawPos = Offset(point.position2D.dx, point.position2D.dy - altitudeOffset);
+    final drawPos =
+        Offset(point.position2D.dx, point.position2D.dy - altitudeOffset);
 
     // === Globe.GL Style 3D Tilted Point ===
     // The point should appear as if it's a disc lying flat on the sphere surface
@@ -952,7 +1030,8 @@ class GpuForegroundPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     // Width = major axis (full), Height = minor axis (foreshortened)
-    final rect = Rect.fromCenter(center: Offset.zero, width: majorAxis, height: minorAxis);
+    final rect = Rect.fromCenter(
+        center: Offset.zero, width: majorAxis, height: minorAxis);
     canvas.drawOval(rect, paint);
 
     canvas.restore();
@@ -966,7 +1045,8 @@ class GpuForegroundPainter extends CustomPainter {
     final globeScale = radius / baseRadius;
 
     // Scale based on depth and size attenuation
-    final depthScale = style.sizeAttenuation ? (0.7 + 0.6 * satellite.depth) : 1.0;
+    final depthScale =
+        style.sizeAttenuation ? (0.7 + 0.6 * satellite.depth) : 1.0;
     final scaledSize = style.size * depthScale * globeScale;
 
     // Apply transition animation
@@ -976,7 +1056,8 @@ class GpuForegroundPainter extends CustomPainter {
     if (style.hasGlow) {
       final glowColor = style.glowColor ?? style.color;
       final glowPaint = Paint()
-        ..color = glowColor.withAlpha((alpha * style.glowIntensity * 0.5 * 255).round())
+        ..color = glowColor
+            .withAlpha((alpha * style.glowIntensity * 0.5 * 255).round())
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, scaledSize * 1.5);
       canvas.drawCircle(satellite.position2D, scaledSize * 1.5, glowPaint);
     }
@@ -992,7 +1073,10 @@ class GpuForegroundPainter extends CustomPainter {
         break;
 
       case SatelliteShape.square:
-        final rect = Rect.fromCenter(center: satellite.position2D, width: scaledSize * 2, height: scaledSize * 2);
+        final rect = Rect.fromCenter(
+            center: satellite.position2D,
+            width: scaledSize * 2,
+            height: scaledSize * 2);
         canvas.save();
         canvas.translate(satellite.position2D.dx, satellite.position2D.dy);
         canvas.rotate(math.pi / 4); // Rotate 45 degrees for diamond shape
@@ -1003,9 +1087,12 @@ class GpuForegroundPainter extends CustomPainter {
 
       case SatelliteShape.triangle:
         final path = Path();
-        path.moveTo(satellite.position2D.dx, satellite.position2D.dy - scaledSize);
-        path.lineTo(satellite.position2D.dx - scaledSize * 0.866, satellite.position2D.dy + scaledSize * 0.5);
-        path.lineTo(satellite.position2D.dx + scaledSize * 0.866, satellite.position2D.dy + scaledSize * 0.5);
+        path.moveTo(
+            satellite.position2D.dx, satellite.position2D.dy - scaledSize);
+        path.lineTo(satellite.position2D.dx - scaledSize * 0.866,
+            satellite.position2D.dy + scaledSize * 0.5);
+        path.lineTo(satellite.position2D.dx + scaledSize * 0.866,
+            satellite.position2D.dy + scaledSize * 0.5);
         path.close();
         canvas.drawPath(path, paint);
         break;
@@ -1019,14 +1106,20 @@ class GpuForegroundPainter extends CustomPainter {
         break;
 
       case SatelliteShape.customImage:
-        _drawCustomImage(canvas, satellite.position2D, scaledSize, satellite.satellite.style.customImage,
-            satellite.satellite.style.customImageRotated, paint);
+        _drawCustomImage(
+            canvas,
+            satellite.position2D,
+            scaledSize,
+            satellite.satellite.style.customImage,
+            satellite.satellite.style.customImageRotated,
+            paint);
         break;
     }
   }
 
   // Draw a custom image, you need to provide a [PictureInfo] instance preloaded before calling this method.
-  void _drawCustomImage(Canvas canvas, Offset center, double size, PictureInfo? customImage, bool rotated, Paint paint) {
+  void _drawCustomImage(Canvas canvas, Offset center, double size,
+      PictureInfo? customImage, bool rotated, Paint paint) {
     if (customImage == null) return;
     canvas.save();
     canvas.translate(center.dx, center.dy);
@@ -1063,14 +1156,16 @@ class GpuForegroundPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
-  void _drawSatelliteIcon(Canvas canvas, Offset center, double size, Paint paint) {
+  void _drawSatelliteIcon(
+      Canvas canvas, Offset center, double size, Paint paint) {
     // Draw a simple satellite shape: body with two solar panels
     final bodySize = size * 0.6;
     final panelWidth = size * 0.8;
     final panelHeight = size * 0.3;
 
     // Body (rectangle)
-    final bodyRect = Rect.fromCenter(center: center, width: bodySize, height: bodySize);
+    final bodyRect =
+        Rect.fromCenter(center: center, width: bodySize, height: bodySize);
     canvas.drawRect(bodyRect, paint);
 
     // Left solar panel
@@ -1141,7 +1236,8 @@ class GpuForegroundPainter extends CustomPainter {
             final endTangent = metric.getTangentForOffset(endDash);
 
             if (startTangent != null && endTangent != null) {
-              canvas.drawLine(startTangent.position, endTangent.position, paint);
+              canvas.drawLine(
+                  startTangent.position, endTangent.position, paint);
             }
           }
           distance += dashLength + gapLength;
@@ -1152,16 +1248,22 @@ class GpuForegroundPainter extends CustomPainter {
     }
   }
 
-  void _drawLabel(Canvas canvas, String text, TextStyle? style, Offset position, Size size) {
-    final textStyle = style ?? const TextStyle(color: Colors.white, fontSize: 12);
+  void _drawLabel(Canvas canvas, String text, TextStyle? style, Offset position,
+      Size size) {
+    final textStyle =
+        style ?? const TextStyle(color: Colors.white, fontSize: 12);
     final textSpan = TextSpan(text: text, style: textStyle);
-    final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
+    final textPainter =
+        TextPainter(text: textSpan, textDirection: TextDirection.ltr);
     textPainter.layout();
 
-    final offset = Offset(position.dx - textPainter.width / 2, position.dy - textPainter.height - 8);
+    final offset = Offset(position.dx - textPainter.width / 2,
+        position.dy - textPainter.height - 8);
 
     // Ensure label stays within bounds
-    final clampedOffset = Offset(offset.dx.clamp(0, size.width - textPainter.width), offset.dy.clamp(0, size.height - textPainter.height));
+    final clampedOffset = Offset(
+        offset.dx.clamp(0, size.width - textPainter.width),
+        offset.dy.clamp(0, size.height - textPainter.height));
 
     textPainter.paint(canvas, clampedOffset);
   }
