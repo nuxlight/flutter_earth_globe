@@ -318,6 +318,16 @@ _controller.clearPointConnections();
 
 Satellites are objects that orbit around the globe with customizable orbital parameters.
 
+Custom satellite images can be supplied as a Flutter `ui.Picture` and its intrinsic size. The caller owns the picture and must dispose it after removing all satellite styles that use it. For SVG input, load it in the app (for example with `flutter_svg`) and pass the resulting `PictureInfo.picture` and `PictureInfo.size`:
+
+```dart
+style: SatelliteStyle(
+  shape: SatelliteShape.customImage,
+  customImage: pictureInfo.picture,
+  customImageSize: pictureInfo.size,
+)
+```
+
 ```dart
 // Geostationary satellite
 _controller.addSatellite(Satellite(

@@ -1,9 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'globe_coordinates.dart';
 
@@ -42,7 +42,11 @@ class SatelliteStyle {
   final Color orbitPathColor;
   final double orbitPathWidth;
   final bool orbitPathDashed;
-  final PictureInfo? customImage;
+  /// A preloaded custom image picture. The caller owns this picture and must
+  /// dispose it after it is no longer used by any satellite style.
+  final ui.Picture? customImage;
+  /// Intrinsic dimensions of [customImage], in logical drawing units.
+  final Size? customImageSize;
   final bool customImageRotated;
 
   const SatelliteStyle({
@@ -59,6 +63,7 @@ class SatelliteStyle {
     this.orbitPathWidth = 1.0,
     this.orbitPathDashed = false,
     this.customImage,
+    this.customImageSize,
     this.customImageRotated = false,
   });
 
@@ -117,7 +122,8 @@ class SatelliteStyle {
     Color? orbitPathColor,
     double? orbitPathWidth,
     bool? orbitPathDashed,
-    PictureInfo? customImage,
+    ui.Picture? customImage,
+    Size? customImageSize,
     bool? customImageRotated,
   }) {
     return SatelliteStyle(
@@ -134,6 +140,7 @@ class SatelliteStyle {
         orbitPathWidth: orbitPathWidth ?? this.orbitPathWidth,
         orbitPathDashed: orbitPathDashed ?? this.orbitPathDashed,
         customImage: customImage ?? this.customImage,
+        customImageSize: customImageSize ?? this.customImageSize,
         customImageRotated: customImageRotated ?? this.customImageRotated);
   }
 }

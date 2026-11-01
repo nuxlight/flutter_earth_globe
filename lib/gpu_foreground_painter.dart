@@ -1,8 +1,8 @@
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'globe_coordinates.dart';
 import 'line_helper.dart';
@@ -1019,27 +1019,27 @@ class GpuForegroundPainter extends CustomPainter {
 
       case SatelliteShape.customImage:
         _drawCustomImage(canvas, satellite.position2D, scaledSize, satellite.satellite.style.customImage,
-            satellite.satellite.style.customImageRotated, paint);
+            satellite.satellite.style.customImageSize, satellite.satellite.style.customImageRotated, paint);
         break;
     }
   }
 
-  // Draw a custom image, you need to provide a [PictureInfo] instance preloaded before calling this method.
-  void _drawCustomImage(Canvas canvas, Offset center, double size, PictureInfo? customImage, bool rotated, Paint paint) {
-    if (customImage == null) return;
+  // Draw a custom image, which must be preloaded before calling this method.
+  void _drawCustomImage(Canvas canvas, Offset center, double size, Picture? customImage, Size? customImageSize, bool rotated, Paint paint) {
+    if (customImage == null || customImageSize == null || customImageSize.isEmpty) return;
     canvas.save();
     canvas.translate(center.dx, center.dy);
 
     if (rotated) canvas.rotate(math.pi / 4);
 
-    final double scaleX = (size * 2) / customImage.size.width;
-    final double scaleY = (size * 2) / customImage.size.height;
+    final double scaleX = (size * 2) / customImageSize.width;
+    final double scaleY = (size * 2) / customImageSize.height;
     canvas.scale(scaleX, scaleY);
-    canvas.translate(-customImage.size.width / 2, -customImage.size.height / 2);
+    canvas.translate(-customImageSize.width / 2, -customImageSize.height / 2);
 
-    final bounds = Rect.fromLTWH(0, 0, customImage.size.width, customImage.size.height);
-    canvas.saveLayer(bounds, Paint()..color = Color.fromRGBO(0, 0, 0, paint.color.opacity));
-    canvas.drawPicture(customImage.picture);
+    final bounds = Rect.fromLTWH(0, 0, customImageSize.width, customImageSize.height);
+    canvas.saveLayer(bounds, Paint()..color = Color.fromRGBO(0, 0, 0, paint.color.a));
+    canvas.drawPicture(customImage);
     canvas.restore();
     canvas.restore();
   }
