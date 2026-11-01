@@ -76,7 +76,6 @@ class SatelliteStyle {
       'orbitPathColor': orbitPathColor.toARGB32(),
       'orbitPathWidth': orbitPathWidth,
       'orbitPathDashed': orbitPathDashed,
-      'customImage': customImage,
       'customImageRotated': customImageRotated,
     };
   }
@@ -96,7 +95,6 @@ class SatelliteStyle {
       orbitPathColor: Color(map['orbitPathColor'] as int? ?? 0x4DFFFFFF),
       orbitPathWidth: map['orbitPathWidth'] as double? ?? 1.0,
       orbitPathDashed: map['orbitPathDashed'] as bool? ?? false,
-      customImage: map['customImage'] as PictureInfo?,
       customImageRotated: map['customImageRotated'] as bool? ?? false,
     );
   }
