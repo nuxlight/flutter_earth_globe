@@ -1041,6 +1041,7 @@ class GpuForegroundPainter extends CustomPainter {
     canvas.saveLayer(bounds, Paint()..color = Color.fromRGBO(0, 0, 0, paint.color.opacity));
     canvas.drawPicture(customImage.picture);
     canvas.restore();
+    canvas.restore();
   }
 
   void _drawStar(Canvas canvas, Offset center, double size, Paint paint) {
